@@ -392,6 +392,27 @@ where
         let two_to_one_hash_param: &<<C as Config>::TwoToOneHash as TwoToOneCRHScheme>::Parameters =
             vk.two_to_one_hash_param();
 
+        // We need to collect so that we can both check the lengths and iterate.
+        let commitments: Vec<&LabeledCommitment<Self::Commitment>> =
+            commitments.into_iter().collect();
+        let values: Vec<F> = values.into_iter().collect();
+
+        if commitments.len() != proof_array.len() {
+            return Err(Error::IncorrectInputLength(format!(
+                "commitments {}, but proof_array has length {}",
+                commitments.len(),
+                proof_array.len()
+            )));
+        }
+
+        if commitments.len() != values.len() {
+            return Err(Error::IncorrectInputLength(format!(
+                "commitments {}, but values has length {}",
+                commitments.len(),
+                values.len()
+            )));
+        }
+
         for (i, (labeled_commitment, value)) in commitments.into_iter().zip(values).enumerate() {
             let proof = &proof_array[i];
             let commitment = labeled_commitment.commitment();
